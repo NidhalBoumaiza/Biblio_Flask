@@ -24,6 +24,8 @@ class Emprunt(MethodView):
         """Delete an emprunt by its ID."""
         emprunt = EmpruntModel.query.get_or_404(emprunt_id)
         try:
+            livre = LivreModel.query.get_or_404(emprunt.livre_id)
+            livre.nbre_exemplaires += 1
             db.session.delete(emprunt)
             db.session.commit()
         except SQLAlchemyError:
@@ -47,6 +49,11 @@ class EmpruntList(MethodView):
         livre = LivreModel.query.get_or_404(emprunt_data["livre_id"])
         if livre.nbre_exemplaires <= 0:
             abort(400, message="This book is not available for borrowing.")
+
+        # Automatically set the borrowing date to the current date
+        emprunt_data["date_debut"] = datetime.utcnow().date()
+        # Automatically set the return date to 15 days after the borrowing date
+        emprunt_data["date_retour"] = emprunt_data["date_debut"] + timedelta(days=15)
 
         # Create the borrowing record
         emprunt = EmpruntModel(**emprunt_data)

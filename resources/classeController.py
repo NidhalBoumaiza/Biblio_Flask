@@ -11,7 +11,7 @@ blp = Blueprint("Classes", __name__, description="Operations on classes")
 
 @blp.route("/classe/<int:classe_id>")
 class Classe(MethodView):
-    @jwt_required()
+    # @jwt_required()
     @blp.response(200, ClasseSchema)
     def get(self, classe_id):
         """Get a single class by ID"""

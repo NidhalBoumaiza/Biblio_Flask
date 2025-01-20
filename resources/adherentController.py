@@ -69,13 +69,16 @@ class AdherentList(MethodView):
     @blp.response(201, AdherentSchema)
     def post(self, adherent_data):
         """Create a new adherent."""
+        # Set the default password if none is provided
+        adherent_data["password"] = adherent_data.get("password", "123456")
+
+        # Create the adherent instance
         adherent = AdherentModel(**adherent_data)
 
         try:
             db.session.add(adherent)
             db.session.commit()
         except IntegrityError as e:
-            # Check which field caused the IntegrityError
             if "email" in str(e.orig):
                 abort(400, message="An adherent with this email already exists.")
             elif "username" in str(e.orig):
@@ -88,8 +91,6 @@ class AdherentList(MethodView):
             abort(500, message="An error occurred while creating the adherent.")
 
         return adherent
-
-
 @blp.route("/adherent/<int:adherent_id>/emprunts")
 class AdherentEmprunts(MethodView):
     @blp.response(200, LivreSchema(many=True))

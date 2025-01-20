@@ -7,15 +7,19 @@ from flask_jwt_extended import JWTManager
 from sqlalchemy import text
 import models
 import os
+from flask_cors import CORS
+
 
 from resources.classeController import blp as ClasseBlueprint
-from resources.genreController import blp as GenreBlueprint
 from resources.livreController import blp as LivreBlueprint
 from resources.auteurController import blp as AuteurBlueprint
 from resources.adherentController import blp as AdherentBlueprint
 from resources.empruntController import blp as EmpruntBlueprint
+from resources.authController import auth_blp as AuthBlueprint
+from resources.dashboardController import blp as DashboardBlueprint
 def create_app(db_url=None):
     app = Flask(__name__)
+    CORS(app)
     app.config["API_TITLE"] = "Bibliotheque REST API"
     app.config["API_VERSION"] = "v1"
     app.config["OPENAPI_VERSION"] = "3.0.3"
@@ -45,9 +49,10 @@ def create_app(db_url=None):
             return f"Database connection failed: {e}"
 
     api.register_blueprint(ClasseBlueprint)
-    api.register_blueprint(GenreBlueprint)
     api.register_blueprint(LivreBlueprint)
     api.register_blueprint(AuteurBlueprint)
     api.register_blueprint(AdherentBlueprint)
     api.register_blueprint(EmpruntBlueprint)
+    api.register_blueprint(AuthBlueprint)
+    api.register_blueprint(DashboardBlueprint)
     return app

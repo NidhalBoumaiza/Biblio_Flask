@@ -27,12 +27,18 @@ class Login(MethodView):
 
         # Find the user
         user = AdherentModel.query.filter_by(username=username).first()
-        if not user or not check_password_hash(user.password, password):
+        if not user or not user.check_password(password):  # Use the check_password method
             abort(401, message="Invalid username or password.")
 
         # Create a JWT token
-        access_token = create_access_token(identity={"id": user.id, "role": user.role})
-        response = jsonify(access_token=access_token)
+        print (user.role)
+        access_token = create_access_token(identity=username)
+        # access_token = create_access_token(identity={"id": user.id, "role": user.role})
+        response = jsonify(
+            access_token=access_token,
+            user_id=user.id,
+            user_role=user.role
+        )
         set_access_cookies(response, access_token)
         return response
 
@@ -50,16 +56,15 @@ class ChangePassword(MethodView):
         new_password = data.get("new_password")
 
         # Verify old password
-        if not check_password_hash(user.password, old_password):
+        if not user.check_password(old_password):
             abort(400, message="Old password is incorrect.")
 
         # Update password
-        user.password = generate_password_hash(new_password)
+        user.password = new_password  # This will automatically hash the password
         user.password_changed = True
         db.session.commit()
 
         return {"message": "Password updated successfully."}
-
 
 @auth_blp.route("/logout")
 class Logout(MethodView):
